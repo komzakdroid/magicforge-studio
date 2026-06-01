@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MagicForge Studio — Indie game &amp; creative tech studio</title>
+<meta name="description" content="MagicForge Studio is an independent game studio crafting beautiful, player-first mobile games. Makers of Star Saviors and MagicMath. Based in Uzbekistan." />
+<meta name="theme-color" content="#07040f" />
+<meta name="keywords" content="MagicForge Studio, Star Saviors, MagicMath, indie game studio, Uzbekistan, mobile games, Android, pixel art platformer, math puzzle" />
+
+<!-- Open Graph / social preview -->
+<meta property="og:title" content="MagicForge Studio" />
+<meta property="og:description" content="An independent studio forging beautiful, player-first mobile games — Star Saviors & MagicMath." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://komzakdroid.github.io/magicforge-studio/" />
+<meta property="og:image" content="assets/starsaviors-feature.png" />
+<meta name="twitter:card" content="summary_large_image" />
+
+<link rel="icon" href="assets/starsaviors-icon.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Sora:wght@200;300;400;600;800&display=swap" rel="stylesheet" />
+
+<!-- Structured data — helps the site look legitimate to search engines -->
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"Organization",
+  "name":"MagicForge Studio",
+  "url":"https://komzakdroid.github.io/magicforge-studio/",
+  "logo":"https://komzakdroid.github.io/magicforge-studio/assets/starsaviors-icon.png",
+  "founder":"Komiljon Zokirov",
+  "foundingDate":"2026",
+  "email":"komzak080@gmail.com",
+  "address":{"@type":"PostalAddress","addressCountry":"UZ","addressRegion":"Buxoro"},
+  "sameAs":["https://play.google.com/store/apps/details?id=com.komzak.magicmath"]
+}
+</script>
+
+<style>
+  :root {
+    --bg:#07040f; --bg-2:#0c0818;
+    --violet:#8b5cf6; --magenta:#d946ef; --cyan:#22d3ee; --ember:#ff7a3d; --gold:#fbbf24;
+    --ink:#f4f0ff; --muted:#a89dc4; --line:rgba(168,157,196,.14);
+    --glass:rgba(20,14,38,.55);
+    --grad:linear-gradient(120deg,var(--cyan),var(--violet) 45%,var(--magenta));
+    --grad-fire:linear-gradient(120deg,var(--gold),var(--ember));
+    --radius:22px; --maxw:1180px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{font-family:'Sora',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased;}
+  img{max-width:100%;display:block;}
+
+  /* background fx */
+  #forge-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;}
+  .aurora{position:fixed;inset:-20%;z-index:-1;pointer-events:none;
+    background:
+      radial-gradient(40% 50% at 18% 18%,rgba(139,92,246,.30),transparent 60%),
+      radial-gradient(38% 45% at 85% 22%,rgba(34,211,238,.22),transparent 60%),
+      radial-gradient(45% 50% at 70% 88%,rgba(217,70,239,.20),transparent 60%),
+      radial-gradient(40% 40% at 12% 85%,rgba(255,122,61,.16),transparent 60%);
+    filter:blur(20px);animation:drift 22s ease-in-out infinite alternate;}
+  @keyframes drift{0%{transform:translate3d(0,0,0) scale(1);}100%{transform:translate3d(-3%,2%,0) scale(1.08);}}
+  .grid-overlay{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.4;
+    background-image:linear-gradient(rgba(168,157,196,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(168,157,196,.045) 1px,transparent 1px);
+    background-size:64px 64px;mask-image:radial-gradient(ellipse 80% 60% at 50% 0%,#000 30%,transparent 80%);}
+
+  .wrap{width:min(92%,var(--maxw));margin-inline:auto;position:relative;z-index:2;}
+  section{position:relative;z-index:2;padding:clamp(56px,9vw,120px) 0;}
+  .eyebrow{font-family:'Space Grotesk';font-size:.78rem;letter-spacing:.32em;text-transform:uppercase;color:var(--cyan);margin-bottom:18px;display:inline-flex;align-items:center;gap:10px;}
+  .eyebrow::before{content:'';width:26px;height:1px;background:var(--cyan);display:inline-block;}
+  h1,h2,h3{font-family:'Space Grotesk';font-weight:700;line-height:1.08;letter-spacing:-.02em;}
+  .grad-text{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .fire-text{background:var(--grad-fire);-webkit-background-clip:text;background-clip:text;color:transparent;}
+
+  /* nav */
+  header{position:fixed;top:0;left:0;right:0;z-index:50;transition:.4s;}
+  .nav{display:flex;align-items:center;justify-content:space-between;padding:16px 0;}
+  header.scrolled{background:rgba(7,4,15,.72);backdrop-filter:blur(18px) saturate(140%);border-bottom:1px solid var(--line);}
+  .logo{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--ink);}
+  .logo svg{width:36px;height:36px;filter:drop-shadow(0 0 14px rgba(139,92,246,.6));}
+  .logo b{font-family:'Space Grotesk';font-weight:700;font-size:1.14rem;letter-spacing:-.01em;}
+  .logo b span{color:var(--muted);font-weight:400;}
+  .nav-links{display:flex;gap:28px;align-items:center;}
+  .nav-links a{color:var(--muted);text-decoration:none;font-size:.92rem;transition:.25s;}
+  .nav-links a:hover{color:var(--ink);}
+  .btn{display:inline-flex;align-items:center;gap:9px;cursor:pointer;font-family:'Space Grotesk';font-weight:600;font-size:.92rem;padding:12px 22px;border-radius:100px;border:none;text-decoration:none;color:#0a0612;background:var(--grad);position:relative;transition:.3s;box-shadow:0 8px 30px -8px rgba(139,92,246,.55);}
+  .btn:hover{transform:translateY(-2px);box-shadow:0 14px 40px -8px rgba(139,92,246,.7);}
+  .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);box-shadow:none;backdrop-filter:blur(8px);}
+  .btn.ghost:hover{border-color:var(--violet);background:rgba(139,92,246,.08);}
+
+  /* hero */
+  .hero{padding-top:clamp(130px,16vh,200px);text-align:center;}
+  .badge{display:inline-flex;align-items:center;gap:10px;padding:8px 16px;border-radius:100px;border:1px solid var(--line);background:var(--glass);backdrop-filter:blur(10px);font-size:.82rem;color:var(--muted);margin-bottom:30px;}
+  .badge .dot{width:8px;height:8px;border-radius:50%;background:var(--cyan);box-shadow:0 0 12px var(--cyan);animation:pulse 2s infinite;}
+  @keyframes pulse{50%{opacity:.35;}}
+  .hero h1{font-size:clamp(2.5rem,7vw,5.2rem);margin-bottom:24px;}
+  .hero p.lead{font-size:clamp(1.05rem,2.2vw,1.4rem);color:var(--muted);max-width:660px;margin:0 auto 38px;font-weight:300;}
+  .hero-cta{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;}
+
+  /* hero game preview row */
+  .hero-art{display:flex;gap:22px;justify-content:center;align-items:center;margin-top:clamp(48px,7vw,80px);flex-wrap:wrap;}
+  .hero-art img{width:min(440px,90%);border-radius:18px;border:1px solid var(--line);box-shadow:0 30px 80px -30px rgba(139,92,246,.6);}
+
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;margin-top:clamp(48px,7vw,80px);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--line);}
+  .stat{background:var(--bg-2);padding:28px 16px;text-align:center;}
+  .stat .num{font-family:'Space Grotesk';font-size:clamp(1.7rem,4vw,2.5rem);font-weight:700;}
+  .stat .lbl{color:var(--muted);font-size:.8rem;letter-spacing:.04em;margin-top:6px;}
+
+  .head{max-width:640px;margin-bottom:52px;}
+  .head.center{margin-inline:auto;text-align:center;}
+  .head h2{font-size:clamp(2rem,4.5vw,3.1rem);margin-bottom:18px;}
+  .head p{color:var(--muted);font-size:1.05rem;font-weight:300;}
+
+  /* game showcase */
+  .game{border:1px solid var(--line);border-radius:28px;overflow:hidden;background:var(--glass);backdrop-filter:blur(14px);margin-bottom:36px;}
+  .game-hero{position:relative;}
+  .game-hero img{width:100%;height:clamp(180px,28vw,300px);object-fit:cover;}
+  .game-hero::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(7,4,15,.95),rgba(7,4,15,.1) 60%,transparent);}
+  .game-head{position:absolute;left:0;right:0;bottom:0;z-index:2;display:flex;align-items:flex-end;gap:20px;padding:clamp(20px,4vw,40px);}
+  .game-head img.ico{width:clamp(64px,11vw,104px);height:clamp(64px,11vw,104px);border-radius:22px;border:1px solid var(--line);box-shadow:0 12px 40px -10px #000;flex-shrink:0;}
+  .game-head .meta h3{font-size:clamp(1.6rem,4vw,2.6rem);}
+  .game-head .meta .sub{color:var(--ink);opacity:.85;font-weight:300;margin-top:4px;font-size:clamp(.9rem,2vw,1.1rem);}
+  .game-tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+  .tag{font-family:'Space Grotesk';font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;padding:5px 12px;border-radius:100px;border:1px solid var(--line);color:var(--muted);background:rgba(7,4,15,.5);}
+
+  .game-body{padding:clamp(26px,4vw,46px);display:grid;grid-template-columns:1.2fr .8fr;gap:clamp(26px,4vw,48px);}
+  .game-body > .desc p{color:var(--muted);font-weight:300;margin-bottom:22px;}
+  .feat{list-style:none;display:grid;gap:13px;}
+  .feat li{display:flex;gap:12px;align-items:flex-start;font-size:.96rem;}
+  .feat li svg{width:20px;height:20px;flex-shrink:0;margin-top:3px;}
+  .feat li b{font-weight:600;}
+  .feat li span{color:var(--muted);font-weight:300;}
+
+  .game-side{display:flex;flex-direction:column;gap:18px;}
+  .shots{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .shots img{border-radius:14px;border:1px solid var(--line);aspect-ratio:9/16;object-fit:cover;width:100%;}
+  .shots.wide{grid-template-columns:1fr;}
+  .shots.wide img{aspect-ratio:2340/1080;}
+  .links-row{display:flex;flex-direction:column;gap:12px;}
+  .gp-btn{display:inline-flex;align-items:center;gap:12px;text-decoration:none;border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--ink);padding:13px 20px;border-radius:14px;transition:.25s;}
+  .gp-btn:hover{border-color:var(--cyan);background:rgba(34,211,238,.08);transform:translateY(-2px);}
+  .gp-btn small{display:block;color:var(--muted);font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;}
+  .gp-btn b{font-family:'Space Grotesk';font-size:1rem;}
+  .pricepill{display:inline-flex;align-items:center;gap:8px;font-size:.82rem;color:var(--gold);border:1px solid rgba(251,191,36,.3);background:rgba(251,191,36,.08);padding:8px 14px;border-radius:100px;align-self:flex-start;}
+
+  /* pillars */
+  .pillars{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+  .pillar{border:1px solid var(--line);border-radius:var(--radius);padding:34px 30px;background:var(--glass);backdrop-filter:blur(12px);transition:.35s;}
+  .pillar:hover{transform:translateY(-5px);border-color:rgba(34,211,238,.4);}
+  .pillar .ico{width:54px;height:54px;border-radius:16px;display:grid;place-items:center;margin-bottom:22px;background:rgba(139,92,246,.12);border:1px solid var(--line);}
+  .pillar .ico svg{width:26px;height:26px;}
+  .pillar h3{font-size:1.3rem;margin-bottom:12px;}
+  .pillar p{color:var(--muted);font-weight:300;font-size:.96rem;}
+
+  /* ===== Engineering section ===== */
+  .mono{font-family:'Space Grotesk',ui-monospace,monospace;}
+  .marquee{position:relative;overflow:hidden;border-block:1px solid var(--line);margin-bottom:clamp(40px,6vw,68px);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);}
+  .marquee-track{display:flex;gap:0;width:max-content;animation:scroll 32s linear infinite;}
+  .marquee:hover .marquee-track{animation-play-state:paused;}
+  @keyframes scroll{to{transform:translateX(-50%);}}
+  .chip{display:inline-flex;align-items:center;gap:10px;padding:16px 26px;color:var(--muted);font-family:ui-monospace,monospace;font-size:.92rem;letter-spacing:.02em;white-space:nowrap;}
+  .chip::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px var(--cyan);}
+  .chip:nth-child(3n)::before{background:var(--magenta);box-shadow:0 0 10px var(--magenta);}
+  .chip:nth-child(3n+1)::before{background:var(--violet);box-shadow:0 0 10px var(--violet);}
+
+  .eng-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(24px,3vw,32px);align-items:stretch;}
+  /* dev note (post) */
+  .devpost{position:relative;border:1px solid var(--line);border-radius:24px;background:var(--glass);backdrop-filter:blur(14px);padding:clamp(28px,4vw,46px);overflow:hidden;}
+  .devpost::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--grad);}
+  .devpost .kicker{font-family:ui-monospace,monospace;font-size:.74rem;letter-spacing:.12em;color:var(--cyan);text-transform:uppercase;}
+  .devpost .pmeta{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;color:var(--muted);font-size:.82rem;margin-bottom:18px;}
+  .devpost h3{font-size:clamp(1.5rem,3vw,2.1rem);margin-bottom:18px;}
+  .devpost p{color:var(--muted);font-weight:300;margin-bottom:16px;font-size:.98rem;}
+  .devpost p b{color:var(--ink);font-weight:600;}
+  .devpost blockquote{margin:24px 0;padding:18px 22px;border-radius:14px;border:1px solid var(--line);background:rgba(34,211,238,.05);font-family:'Space Grotesk';font-size:1.15rem;line-height:1.4;}
+  .devpost blockquote span{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .ptags{display:flex;gap:8px;flex-wrap:wrap;margin-top:24px;}
+  .ptags .tag{background:rgba(7,4,15,.4);}
+
+  /* code panel (module tree) */
+  .codepanel{border:1px solid var(--line);border-radius:24px;overflow:hidden;background:#0a0714;display:flex;flex-direction:column;}
+  .codebar{display:flex;align-items:center;gap:8px;padding:14px 18px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.02);}
+  .codebar .d{width:11px;height:11px;border-radius:50%;}
+  .codebar .t{margin-left:10px;font-family:ui-monospace,monospace;font-size:.78rem;color:var(--muted);}
+  .codebody{padding:22px 22px 26px;font-family:ui-monospace,monospace;font-size:.84rem;line-height:1.95;overflow-x:auto;flex:1;}
+  .codebody .c{color:#5b5478;}
+  .codebody .m{color:var(--ink);}
+  .codebody .k{color:var(--cyan);}
+  .codebody .v{color:var(--magenta);}
+  .codebody .g{color:var(--gold);}
+
+  /* tech stack cards */
+  .techgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:clamp(24px,3vw,32px);}
+  .techcard{border:1px solid var(--line);border-radius:18px;padding:24px;background:var(--glass);backdrop-filter:blur(10px);transition:.3s;}
+  .techcard:hover{transform:translateY(-4px);border-color:rgba(139,92,246,.4);}
+  .techcard .v{font-family:ui-monospace,monospace;font-size:.72rem;color:var(--cyan);letter-spacing:.06em;}
+  .techcard h4{font-family:'Space Grotesk';font-size:1.1rem;margin:8px 0 8px;}
+  .techcard p{color:var(--muted);font-weight:300;font-size:.9rem;}
+
+  /* studio split */
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:clamp(30px,5vw,64px);align-items:center;}
+  .factsheet{border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--glass);backdrop-filter:blur(12px);}
+  .factsheet .row{display:flex;justify-content:space-between;gap:16px;padding:16px 24px;border-bottom:1px solid var(--line);font-size:.95rem;}
+  .factsheet .row:last-child{border-bottom:none;}
+  .factsheet .row span{color:var(--muted);}
+  .factsheet .row b{font-weight:600;text-align:right;}
+
+  /* press / contact */
+  .cta-banner{border-radius:28px;padding:clamp(40px,6vw,72px);text-align:center;border:1px solid var(--line);position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(139,92,246,.16),rgba(34,211,238,.10));}
+  .cta-banner::after{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(60% 80% at 50% 0%,rgba(217,70,239,.25),transparent 70%);}
+  .cta-banner h2{font-size:clamp(2rem,4.5vw,3rem);margin-bottom:18px;position:relative;}
+  .cta-banner p{color:var(--muted);max-width:540px;margin:0 auto 32px;position:relative;font-weight:300;}
+  .cta-banner .hero-cta{position:relative;}
+
+  footer{border-top:1px solid var(--line);padding:60px 0 40px;position:relative;z-index:2;}
+  .foot-grid{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:36px;margin-bottom:48px;}
+  .foot-brand p{color:var(--muted);font-weight:300;margin-top:18px;max-width:300px;font-size:.94rem;}
+  .foot-col h4{font-family:'Space Grotesk';font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:18px;}
+  .foot-col a{display:block;color:var(--ink);text-decoration:none;margin-bottom:12px;font-size:.94rem;opacity:.85;transition:.2s;}
+  .foot-col a:hover{opacity:1;color:var(--cyan);}
+  .foot-bottom{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;padding-top:28px;border-top:1px solid var(--line);color:var(--muted);font-size:.85rem;}
+
+  .reveal{opacity:0;transform:translateY(34px);transition:.8s cubic-bezier(.2,.7,.2,1);}
+  .reveal.in{opacity:1;transform:none;}
+
+  @media(max-width:880px){
+    .nav-links{display:none;}
+    .game-body{grid-template-columns:1fr;}
+    .pillars{grid-template-columns:1fr;}
+    .stats{grid-template-columns:repeat(2,1fr);}
+    .split{grid-template-columns:1fr;}
+    .foot-grid{grid-template-columns:1fr 1fr;}
+    .eng-grid{grid-template-columns:1fr;}
+    .techgrid{grid-template-columns:1fr;}
+  }
+  @media(max-width:880px) and (min-width:561px){
+    .techgrid{grid-template-columns:1fr 1fr;}
+  }
+</style>
+</head>
+<body>
+
+<canvas id="forge-canvas"></canvas>
+<div class="aurora"></div>
+<div class="grid-overlay"></div>
+
+<!-- NAV -->
+<header id="hdr">
+  <div class="wrap nav">
+    <a class="logo" href="#top" aria-label="MagicForge Studio home">
+      <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="lg" x1="0" y1="0" x2="48" y2="48"><stop stop-color="#22d3ee"/><stop offset=".5" stop-color="#8b5cf6"/><stop offset="1" stop-color="#d946ef"/></linearGradient></defs>
+        <path d="M24 3l4.2 12.6L41 19l-9.5 8.4L34 41 24 33.5 14 41l2.5-13.6L7 19l12.8-3.4L24 3z" stroke="url(#lg)" stroke-width="2.4" stroke-linejoin="round"/>
+        <circle cx="24" cy="22" r="4.2" fill="url(#lg)"/>
+      </svg>
+      <b>MagicForge<span> Studio</span></b>
+    </a>
+    <nav class="nav-links">
+      <a href="#games">Games</a>
+      <a href="#craft">What we do</a>
+      <a href="#engineering">Engineering</a>
+      <a href="#studio">Studio</a>
+      <a href="#press">Press</a>
+    </nav>
+    <a class="btn" href="#games">Our games</a>
+  </div>
+</header>
+
+<a id="top"></a>
+
+<!-- HERO -->
+<section class="hero wrap">
+  <div class="badge reveal"><span class="dot"></span> Independent game &amp; creative tech studio · Est. 2026</div>
+  <h1 class="reveal">We forge worlds<br>worth <span class="grad-text">getting lost in</span>.</h1>
+  <p class="lead reveal">MagicForge Studio is an independent studio crafting beautiful, player-first mobile games — from a 300-level cosmic platformer to a math puzzle that feels like magic.</p>
+  <div class="hero-cta reveal">
+    <a class="btn" href="#games">Explore our games →</a>
+    <a class="btn ghost" href="#contact">Work with us</a>
+  </div>
+
+  <div class="hero-art reveal">
+    <img src="assets/starsaviors-feature.png" alt="Star Saviors — Cosmic Quest" loading="lazy" />
+    <img src="assets/magicmath-feature.png" alt="MagicMath — Cross-Math Puzzle Adventure" loading="lazy" />
+  </div>
+
+  <div class="stats reveal">
+    <div class="stat"><div class="num grad-text">2</div><div class="lbl">Games shipped</div></div>
+    <div class="stat"><div class="num grad-text">420+</div><div class="lbl">Hand-crafted levels</div></div>
+    <div class="stat"><div class="num grad-text">3</div><div class="lbl">Languages · EN/RU/UZ</div></div>
+    <div class="stat"><div class="num fire-text">0</div><div class="lbl">Ads in our games</div></div>
+  </div>
+</section>
+
+<!-- GAMES -->
+<section id="games" class="wrap">
+  <div class="head center reveal">
+    <div class="eyebrow">Our games</div>
+    <h2>Two worlds, <span class="grad-text">one studio</span></h2>
+    <p>Every level, sprite, sound and equation is forged by hand — designed to be instantly fun, quietly clever, and genuinely beautiful.</p>
+  </div>
+
+  <!-- STAR SAVIORS -->
+  <article class="game reveal">
+    <div class="game-hero">
+      <img src="assets/starsaviors-feature.png" alt="Star Saviors key art" loading="lazy" />
+      <div class="game-head">
+        <img class="ico" src="assets/starsaviors-icon.png" alt="Star Saviors icon" loading="lazy" />
+        <div class="meta">
+          <h3>Star Saviors</h3>
+          <div class="sub">Cosmic Quest · Five heroes. Five worlds. One princess to save.</div>
+          <div class="game-tags">
+            <span class="tag">Arcade Platformer</span>
+            <span class="tag">Pixel Art</span>
+            <span class="tag">Single Player</span>
+            <span class="tag">Offline</span>
+            <span class="tag">PEGI 3 · Everyone</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="game-body">
+      <div class="desc">
+        <p>Jump between worlds, defeat the cosmic dragon, and rescue Princess Lumi. A retro pixel-art platformer with <b>300 hand-crafted levels</b> across five planets — Earth, Moon, Mars, Venus and Jupiter — each with its own enemies, hazards and signature mini-bosses.</p>
+        <ul class="feat">
+          <li><svg viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4L19 7" stroke="#22d3ee" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>5 playable heroes</b> — Ninja Frog, Mask Dude, Pink Man, Virtual Guy &amp; Cosmic Voyager, each with a unique super-ability.</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4L19 7" stroke="#22d3ee" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>300 levels, 30+ hours</b> of platforming across 5 distinct worlds.</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4L19 7" stroke="#22d3ee" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>13 enemy types, 6 rival heroes, 5 planet bosses</b> + a final dragon showdown.</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4L19 7" stroke="#22d3ee" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>Daily challenges</b> with rotating modifiers + endless mode with leaderboards.</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4L19 7" stroke="#22d3ee" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>No ads · no in-app purchases · no tracking.</b> Optional cloud save via Google.</span></li>
+        </ul>
+      </div>
+      <div class="game-side">
+        <div class="shots wide">
+          <img src="assets/starsaviors-gameplay.png" alt="Star Saviors gameplay" loading="lazy" />
+          <img src="assets/starsaviors-map.png" alt="Star Saviors world map" loading="lazy" />
+        </div>
+        <span class="pricepill">★ Free · No ads · No IAP</span>
+        <div class="links-row">
+          <!-- Verify this is live before sharing; package: com.komzak.starsaviors -->
+          <a class="gp-btn" href="https://play.google.com/store/apps/details?id=com.komzak.starsaviors" target="_blank" rel="noopener">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M3.6 2.2 13.4 12 3.6 21.8c-.3-.2-.5-.6-.5-1V3.2c0-.4.2-.8.5-1z" fill="#22d3ee"/><path d="M16.8 8.6 13.4 12l3.4 3.4 3.4-2c.7-.4.7-1.4 0-1.8l-3.4-2z" fill="#fbbf24"/><path d="m13.4 12 3.4-3.4-11-6.2c-.6-.3-1.3-.2-1.7.2L13.4 12z" fill="#8b5cf6"/><path d="m13.4 12-9.3 9.4c.4.4 1.1.5 1.7.2l11-6.2L13.4 12z" fill="#d946ef"/></svg>
+            <span><small>Get it on</small><b>Google Play</b></span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- MAGICMATH -->
+  <article class="game reveal">
+    <div class="game-hero">
+      <img src="assets/magicmath-feature.png" alt="MagicMath key art" loading="lazy" />
+      <div class="game-head">
+        <img class="ico" src="assets/magicmath-icon.png" alt="MagicMath icon" loading="lazy" />
+        <div class="meta">
+          <h3>MagicMath</h3>
+          <div class="sub">Cross-Math Puzzle Adventure · Where numbers become magic.</div>
+          <div class="game-tags">
+            <span class="tag">Puzzle</span>
+            <span class="tag">Educational</span>
+            <span class="tag">Brain Training</span>
+            <span class="tag">All Ages</span>
+            <span class="tag">Offline</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="game-body">
+      <div class="desc">
+        <p>A spellbinding cross-math puzzle where every row and column must add up. Place the numbers, solve the grid, and practise mental math until it feels like casting magic — wrapped in a calm, expressive interface.</p>
+        <ul class="feat">
+          <li><svg viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4L19 7" stroke="#d946ef" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>5 game modes</b> — from gentle warm-ups to timed brain-burners.</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4L19 7" stroke="#d946ef" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>120 levels</b> of cross-math puzzles with rising difficulty.</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4L19 7" stroke="#d946ef" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>Daily quests, prizes &amp; progression</b> that reward consistent play.</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4L19 7" stroke="#d946ef" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>Fully localized</b> in English, Russian &amp; O'zbekcha.</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4L19 7" stroke="#d946ef" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>Clean, accessible design</b> — built on modern Android (Kotlin &amp; Compose).</span></li>
+        </ul>
+      </div>
+      <div class="game-side">
+        <div class="shots">
+          <img src="assets/magicmath-solve.png" alt="MagicMath puzzle gameplay" loading="lazy" />
+          <img src="assets/magicmath-levels.png" alt="MagicMath 120 levels" loading="lazy" />
+        </div>
+        <span class="pricepill">✦ Free to play</span>
+        <div class="links-row">
+          <a class="gp-btn" href="https://play.google.com/store/apps/details?id=com.komzak.magicmath" target="_blank" rel="noopener">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M3.6 2.2 13.4 12 3.6 21.8c-.3-.2-.5-.6-.5-1V3.2c0-.4.2-.8.5-1z" fill="#22d3ee"/><path d="M16.8 8.6 13.4 12l3.4 3.4 3.4-2c.7-.4.7-1.4 0-1.8l-3.4-2z" fill="#fbbf24"/><path d="m13.4 12 3.4-3.4-11-6.2c-.6-.3-1.3-.2-1.7.2L13.4 12z" fill="#8b5cf6"/><path d="m13.4 12-9.3 9.4c.4.4 1.1.5 1.7.2l11-6.2L13.4 12z" fill="#d946ef"/></svg>
+            <span><small>Get it on</small><b>Google Play</b></span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </article>
+</section>
+
+<!-- WHAT WE DO -->
+<section id="craft" class="wrap">
+  <div class="head center reveal">
+    <div class="eyebrow">What we do</div>
+    <h2>Game design · Creativity · <span class="grad-text">Engineering</span></h2>
+  </div>
+  <div class="pillars">
+    <div class="pillar reveal">
+      <div class="ico"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2 4 6v6c0 5 3.5 8 8 10 4.5-2 8-5 8-10V6l-8-4z" stroke="#22d3ee" stroke-width="1.6" stroke-linejoin="round"/><path d="m9 12 2 2 4-4" stroke="#22d3ee" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <h3>Playful game design</h3>
+      <p>Mechanics that click in seconds and reward you for hours. We obsess over the feel of every tap, level and reward loop.</p>
+    </div>
+    <div class="pillar reveal">
+      <div class="ico"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3v3m0 12v3m9-9h-3M6 12H3m13.5-6.5-2.1 2.1M9.6 14.4l-2.1 2.1m9-2.1 2.1 2.1M9.6 9.6 7.5 7.5" stroke="#d946ef" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="12" r="3.2" stroke="#d946ef" stroke-width="1.6"/></svg></div>
+      <h3>Bold creativity</h3>
+      <p>Distinct art, expressive motion and a magical visual language — from pixel-art cosmos to soft, modern puzzle UI.</p>
+    </div>
+    <div class="pillar reveal">
+      <div class="ico"><svg viewBox="0 0 24 24" fill="none"><path d="m8 9-4 3 4 3m8-6 4 3-4 3m-2-9-4 12" stroke="#8b5cf6" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <h3>Solid engineering</h3>
+      <p>Built on modern Android &amp; Kotlin Multiplatform — fast, stable, accessible, and ready to scale worldwide.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ENGINEERING -->
+<section id="engineering" class="wrap">
+  <div class="head center reveal">
+    <div class="eyebrow">Inside the forge</div>
+    <h2>One codebase. <span class="grad-text">Every platform.</span></h2>
+    <p>We don't just make games — we engineer them, on the same modern stack a senior Android team would choose in 2026.</p>
+  </div>
+
+  <!-- tech marquee -->
+  <div class="marquee reveal">
+    <div class="marquee-track">
+      <span class="chip">Kotlin&nbsp;Multiplatform</span><span class="chip">Compose&nbsp;Multiplatform</span><span class="chip">Coroutines&nbsp;&amp;&nbsp;Flow</span><span class="chip">Clean&nbsp;Architecture</span><span class="chip">Material&nbsp;3</span><span class="chip">Android&nbsp;+&nbsp;iOS</span><span class="chip">Multi-module&nbsp;Gradle</span><span class="chip">Offline-first</span>
+      <span class="chip">Kotlin&nbsp;Multiplatform</span><span class="chip">Compose&nbsp;Multiplatform</span><span class="chip">Coroutines&nbsp;&amp;&nbsp;Flow</span><span class="chip">Clean&nbsp;Architecture</span><span class="chip">Material&nbsp;3</span><span class="chip">Android&nbsp;+&nbsp;iOS</span><span class="chip">Multi-module&nbsp;Gradle</span><span class="chip">Offline-first</span>
+    </div>
+  </div>
+
+  <div class="eng-grid">
+    <!-- dev note -->
+    <article class="devpost reveal">
+      <div class="pmeta">
+        <span class="kicker">// Engineering note</span>
+        <span>Komiljon Zokirov · Founder &amp; Engineer</span>
+      </div>
+      <h3>Why we build on Kotlin Multiplatform</h3>
+      <p>Both <b>Star Saviors</b> and <b>MagicMath</b> share the same engineering DNA: a single <b>Kotlin Multiplatform</b> codebase. The game rules, state machines and logic live in pure Kotlin common code — Android ships today, iOS plugs in next, with no rewrite and no second team.</p>
+      <blockquote>“One shared brain. <span>Native on every device.</span>”</blockquote>
+      <p>The UI is <b>100% Compose Multiplatform</b> — the same declarative screens render on every target. <b>Coroutines &amp; Flow</b> drive a unidirectional state flow, so what you see on screen is always a pure function of the game's state — predictable, testable, leak-free.</p>
+      <p>Star Saviors is split into focused modules — <b>one per planet</b> (Earth, Moon, Mars, Venus, Jupiter), a shared game-state brain, a design system and a network layer. Clean boundaries mean a bug on Mars can't break the Moon, and new worlds plug in without touching the core.</p>
+      <div class="ptags">
+        <span class="tag">Kotlin 2.3</span><span class="tag">Compose MP 1.10</span><span class="tag">AGP 9</span><span class="tag">UDF</span><span class="tag">KSP</span>
+      </div>
+    </article>
+
+    <!-- module tree -->
+    <div class="codepanel reveal">
+      <div class="codebar">
+        <span class="d" style="background:#ff5f57"></span><span class="d" style="background:#febc2e"></span><span class="d" style="background:#28c840"></span>
+        <span class="t">star-saviors / settings.gradle.kts</span>
+      </div>
+      <div class="codebody">
+<span class="c">// 11 modules · clean architecture</span>
+<span class="k">include</span>(<span class="v">":composeApp"</span>)      <span class="c">// shared UI</span>
+<span class="k">include</span>(<span class="v">":androidApp"</span>)
+<span class="k">include</span>(<span class="v">":domain:gamestate"</span>)   <span class="c">// the brain</span>
+<span class="k">include</span>(<span class="v">":core:designsystem"</span>)
+<span class="k">include</span>(<span class="v">":integration:network"</span>)
+<span class="k">include</span>(<span class="v">":planet:earth"</span>)    <span class="g">// 🌍</span>
+<span class="k">include</span>(<span class="v">":planet:moon"</span>)     <span class="g">// 🌑</span>
+<span class="k">include</span>(<span class="v">":planet:mars"</span>)     <span class="g">// 🔴</span>
+<span class="k">include</span>(<span class="v">":planet:venus"</span>)    <span class="g">// 🟠</span>
+<span class="k">include</span>(<span class="v">":planet:jupiter"</span>)  <span class="g">// 🟤</span>
+<span class="k">include</span>(<span class="v">":feature:levels-extra"</span>)
+<span class="c">// → Android now · iOS next</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- tech stack cards -->
+  <div class="techgrid">
+    <div class="techcard reveal"><div class="v">v2.3.20</div><h4>Kotlin Multiplatform</h4><p>One Kotlin codebase, shared logic across Android &amp; iOS.</p></div>
+    <div class="techcard reveal"><div class="v">v1.10.3</div><h4>Compose Multiplatform</h4><p>A single declarative UI that renders on every screen.</p></div>
+    <div class="techcard reveal"><div class="v">Reactive</div><h4>Coroutines &amp; Flow</h4><p>Unidirectional data flow — state in, UI out, no surprises.</p></div>
+    <div class="techcard reveal"><div class="v">11 modules</div><h4>Clean Architecture</h4><p>domain · core · feature boundaries that scale safely.</p></div>
+    <div class="techcard reveal"><div class="v">AGP 9 · Gradle</div><h4>Modern build</h4><p>Convention plugins, version catalog, fast incremental builds.</p></div>
+    <div class="techcard reveal"><div class="v">Private</div><h4>Offline-first</h4><p>Games run fully offline. Optional cloud save — your data stays yours.</p></div>
+  </div>
+</section>
+
+<!-- STUDIO -->
+<section id="studio" class="wrap">
+  <div class="split">
+    <div class="reveal">
+      <div class="eyebrow">The studio</div>
+      <h2 style="font-size:clamp(2rem,4.5vw,3rem);margin-bottom:18px;">A small forge with a <span class="fire-text">big imagination</span></h2>
+      <p style="color:var(--muted);font-weight:300;margin-bottom:18px;">MagicForge Studio is an independent game studio founded by <b style="color:var(--ink)">Komiljon Zokirov</b> in Uzbekistan. We believe great games come from craft, not size — so we build each one by hand, end to end: design, art direction, code and polish.</p>
+      <p style="color:var(--muted);font-weight:300;">Our games ship ad-free where we can, fully localized for our region, and engineered to the highest standards on modern Android. We're just getting started — and we're forging the next world now.</p>
+    </div>
+    <div class="factsheet reveal">
+      <div class="row"><span>Studio</span><b>MagicForge Studio</b></div>
+      <div class="row"><span>Founder</span><b>Komiljon Zokirov</b></div>
+      <div class="row"><span>Founded</span><b>2026</b></div>
+      <div class="row"><span>Based in</span><b>Uzbekistan 🇺🇿</b></div>
+      <div class="row"><span>Platform</span><b>Android (Google Play)</b></div>
+      <div class="row"><span>Languages</span><b>English · Русский · O'zbekcha</b></div>
+      <div class="row"><span>Games live</span><b>Star Saviors · MagicMath</b></div>
+      <div class="row"><span>Contact</span><b>komzak080@gmail.com</b></div>
+    </div>
+  </div>
+</section>
+
+<!-- PRESS -->
+<section id="press" class="wrap">
+  <div class="cta-banner reveal">
+    <h2>Press &amp; partnerships</h2>
+    <p>For media coverage, feature requests, collaborations or business enquiries — reach out any time. We're happy to share press kits, key art and review builds.</p>
+    <div class="hero-cta">
+      <a class="btn" href="mailto:komzak080@gmail.com?subject=MagicForge%20Studio%20-%20Press%2FPartnership">Email the studio</a>
+      <a class="btn ghost" href="https://play.google.com/store/apps/details?id=com.komzak.magicmath" target="_blank" rel="noopener">See us on Google Play</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer id="contact">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a class="logo" href="#top">
+          <svg viewBox="0 0 48 48" fill="none"><path d="M24 3l4.2 12.6L41 19l-9.5 8.4L34 41 24 33.5 14 41l2.5-13.6L7 19l12.8-3.4L24 3z" stroke="url(#lg)" stroke-width="2.4" stroke-linejoin="round"/><circle cx="24" cy="22" r="4.2" fill="url(#lg)"/></svg>
+          <b>MagicForge<span> Studio</span></b>
+        </a>
+        <p>An independent game &amp; creative tech studio forging beautiful, player-first mobile games. Based in Uzbekistan.</p>
+      </div>
+      <div class="foot-col">
+        <h4>Games</h4>
+        <a href="https://play.google.com/store/apps/details?id=com.komzak.starsaviors" target="_blank" rel="noopener">Star Saviors</a>
+        <a href="https://play.google.com/store/apps/details?id=com.komzak.magicmath" target="_blank" rel="noopener">MagicMath</a>
+      </div>
+      <div class="foot-col">
+        <h4>Studio</h4>
+        <a href="#craft">What we do</a>
+        <a href="#studio">About</a>
+        <a href="#press">Press kit</a>
+      </div>
+      <div class="foot-col">
+        <h4>Legal &amp; support</h4>
+        <a href="mailto:komzak080@gmail.com">Support</a>
+        <a href="https://komzakdroid.github.io/magicmath-privacy/" target="_blank" rel="noopener">Privacy policy</a>
+        <a href="https://komzakdroid.github.io/magicmath-privacy/delete-account.html" target="_blank" rel="noopener">Delete account</a>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© <span id="yr"></span> MagicForge Studio. All rights reserved.</span>
+      <span>Forged with ✦ in Uzbekistan</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('yr').textContent = new Date().getFullYear();
+  const hdr = document.getElementById('hdr');
+  addEventListener('scroll', () => hdr.classList.toggle('scrolled', scrollY > 30));
+
+  const io = new IntersectionObserver((es) => {
+    es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold:.12 });
+  document.querySelectorAll('.reveal').forEach((el,i) => { el.style.transitionDelay = (i%4)*70 + 'ms'; io.observe(el); });
+
+  // ember particle field
+  const c = document.getElementById('forge-canvas'), x = c.getContext('2d');
+  let w,h,parts; const COL=['#22d3ee','#8b5cf6','#d946ef','#ff7a3d','#fbbf24'];
+  function resize(){ w=c.width=innerWidth; h=c.height=innerHeight;
+    const n=Math.min(80,Math.floor(w/18));
+    parts=Array.from({length:n},()=>({x:Math.random()*w,y:Math.random()*h,r:Math.random()*1.8+.4,vx:(Math.random()-.5)*.25,vy:-(Math.random()*.5+.15),a:Math.random()*.5+.2,col:COL[Math.floor(Math.random()*COL.length)]}));
+  }
+  function tick(){ x.clearRect(0,0,w,h);
+    for(const p of parts){ p.x+=p.vx;p.y+=p.vy; if(p.y<-10){p.y=h+10;p.x=Math.random()*w;} if(p.x<0)p.x=w; if(p.x>w)p.x=0;
+      x.globalAlpha=p.a; x.beginPath(); x.arc(p.x,p.y,p.r,0,7); x.fillStyle=p.col; x.shadowBlur=10; x.shadowColor=p.col; x.fill(); }
+    x.globalAlpha=1; x.shadowBlur=0; requestAnimationFrame(tick);
+  }
+  addEventListener('resize',resize); resize(); tick();
+</script>
+</body>
+</html>
